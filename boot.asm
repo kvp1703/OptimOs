@@ -19,7 +19,22 @@ step2:
     mov sp, 0x7c00
     sti
 
-    mov si, message
+    mov ah, 2 ; Read sector command
+    mov al, 1 ; one sector to read
+    mov ch, 0 ; Cylinder low 8 bits
+    mov cl, 2 ; Read sector 2
+    mov dh, 0 ; head number 
+    mov bx, buffer ; ES:BX -> data buffer
+    int 0x13
+    jc error
+
+    mov si, buffer
+    call print
+    
+    jmp $
+
+error:
+    mov si, error_message
     call print
     jmp $
 
@@ -39,8 +54,9 @@ print_char:
     int 0x10 
     ret
 
-message: db 'Hello World!', 0
+error_message: db 'Failed to load secotor' , 0
 
 times 510-($ - $$) db 0 
 dw 0xAA55
 
+buffer:
